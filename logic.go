@@ -2,11 +2,29 @@ package wxsign
 
 import (
 	"fmt"
+	"github.com/bitly/go-simplejson"
+	"io/ioutil"
+	"net/http"
 	"time"
-
-	simplejson "github.com/bitly/go-simplejson"
-	"github.com/usthooz/gutil/http"
 )
+
+// Get
+func Get(path string) (resp *http.Response, bs []byte, err error) {
+	resp, err = http.Get(path)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		err = fmt.Errorf("http get error-> status = %d", resp.StatusCode)
+		return
+	}
+	bs, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+	return
+}
 
 // GetAccessToken 获取普通api调用需要的access_token 因为有次数限制，需要缓存
 func (wSign *WxSign) GetAccessToken() (accessToken string, err error) {
@@ -23,7 +41,7 @@ func (wSign *WxSign) GetAccessToken() (accessToken string, err error) {
 		}
 	*/
 	url := fmt.Sprintf("%s%sappid=%s&secret=%s", WxAPIURLPrefix, WxAuthURL, wSign.Appid, wSign.AppSecret)
-	_, bs, e := xhttp.Get(url)
+	_, bs, e := Get(url)
 	if e != nil {
 		err = fmt.Errorf("GetAccessToken: Request Failed, err-> %v", e)
 		return
@@ -64,7 +82,7 @@ func (wSign *WxSign) GetTicket() (ticket string, err error) {
 		return
 	}
 	url := fmt.Sprintf("%s%saccess_token=%s&type=jsapi", WxAPIURLPrefix, WxGetTicketURL, accessToken)
-	_, bs, e := xhttp.Get(url)
+	_, bs, e := Get(url)
 	if e != nil {
 		err = fmt.Errorf("GetJsTicket: get ticket err-> %v", e)
 		return

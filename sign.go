@@ -3,12 +3,24 @@ package wxsign
 import (
 	"crypto/sha1"
 	"fmt"
+	"math/rand"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/usthooz/gutil"
 )
+
+var (
+	chars = []byte("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+)
+
+// RandString
+func RandString(l int) string {
+	bs := []byte{}
+	for i := 0; i < l; i++ {
+		bs = append(bs, chars[rand.Intn(len(chars))])
+	}
+	return string(bs)
+}
 
 // GetJsSign GetJsSign
 func (wSign *WxSign) GetJsSign(url string) (*WxJsSign, error) {
@@ -20,7 +32,7 @@ func (wSign *WxSign) GetJsSign(url string) (*WxJsSign, error) {
 	urlSlice := strings.Split(url, "#")
 	jsSign := &WxJsSign{
 		Appid:     wSign.Appid,
-		Noncestr:  gutil.RandString(16),
+		Noncestr:  RandString(16),
 		Timestamp: strconv.FormatInt(time.Now().UTC().Unix(), 10),
 		Url:       urlSlice[0],
 	}
