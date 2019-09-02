@@ -5,12 +5,42 @@ import (
 	"github.com/bitly/go-simplejson"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 )
 
 // Get
 func Get(path string) (resp *http.Response, bs []byte, err error) {
 	resp, err = http.Get(path)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		err = fmt.Errorf("http get error-> status = %d", resp.StatusCode)
+		return
+	}
+	bs, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func GetByProxy(path string, proxy_flag bool, proxy_url string) (resp *http.Response, bs []byte, err error) {
+
+	if proxy_flag == false {
+		return Get(path)
+	}
+
+	//服务代理
+	proxyUri, _ := url.Parse(proxy_url)
+	proxy := http.ProxyURL(proxyUri)
+	tr := &http.Transport{Proxy: proxy}
+
+	h := &http.Client{Transport: tr}
+	resp, err = h.Get(path)
+
 	if err != nil {
 		return
 	}
