@@ -32,7 +32,9 @@ func main() {
 		// 缓存ticket使用的redis key
 		"wxsign:ticket",
 	)
-	sign, err := ws.GetJsSign("http://cloudpai.nat300.top/v1/api")
+	var proxy_flag = false
+	var proxy_url = ""
+	sign, err := ws.GetJsSign("http://cloudpai.nat300.top/v1/api", proxy_flag, proxy_url)
 	if err != nil {
 		fmt.Print("Get js sign err-> %#v", err)
 		return

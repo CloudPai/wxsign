@@ -57,7 +57,7 @@ func GetByProxy(path string, proxy_flag bool, proxy_url string) (resp *http.Resp
 }
 
 // GetAccessToken 获取普通api调用需要的access_token 因为有次数限制，需要缓存
-func (wSign *WxSign) GetAccessToken() (accessToken string, err error) {
+func (wSign *WxSign) GetAccessToken(proxy_flag bool, proxy_url string) (accessToken string, err error) {
 	// 首先从redis缓存中取出token
 	accessToken = wSign.GetTokenByCache()
 	if len(accessToken) > 0 {
@@ -71,7 +71,7 @@ func (wSign *WxSign) GetAccessToken() (accessToken string, err error) {
 		}
 	*/
 	url := fmt.Sprintf("%s%sappid=%s&secret=%s", WxAPIURLPrefix, WxAuthURL, wSign.Appid, wSign.AppSecret)
-	_, bs, e := Get(url)
+	_, bs, e := GetByProxy(url, proxy_flag, proxy_url)
 	if e != nil {
 		err = fmt.Errorf("GetAccessToken: Request Failed, err-> %v", e)
 		return
@@ -99,20 +99,20 @@ func (wSign *WxSign) GetAccessToken() (accessToken string, err error) {
 }
 
 // GetTicket 获取JSAPI授权TICKET
-func (wSign *WxSign) GetTicket() (ticket string, err error) {
+func (wSign *WxSign) GetTicket(proxy_flag bool, proxy_url string) (ticket string, err error) {
 	// 首先从缓存获取
 	ticket = wSign.GetTicketByCache()
 	if len(ticket) > 0 {
 		return ticket, nil
 	}
 	//重新获取ticket
-	accessToken, e := wSign.GetAccessToken()
+	accessToken, e := wSign.GetAccessToken(proxy_flag, proxy_url)
 	if e != nil {
 		err = e
 		return
 	}
 	url := fmt.Sprintf("%s%saccess_token=%s&type=jsapi", WxAPIURLPrefix, WxGetTicketURL, accessToken)
-	_, bs, e := Get(url)
+	_, bs, e := GetByProxy(url, proxy_flag, proxy_url)
 	if e != nil {
 		err = fmt.Errorf("GetJsTicket: get ticket err-> %v", e)
 		return

@@ -23,8 +23,8 @@ func RandString(l int) string {
 }
 
 // GetJsSign GetJsSign
-func (wSign *WxSign) GetJsSign(url string) (*WxJsSign, error) {
-	jsTicket, err := wSign.GetTicket()
+func (wSign *WxSign) GetJsSign(url string, proxy_flag bool, proxy_url string) (*WxJsSign, error) {
+	jsTicket, err := wSign.GetTicket(proxy_flag, proxy_url)
 	if err != nil {
 		return nil, err
 	}
